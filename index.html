@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+        :root{
+          --navy-950:#070f24;
+          --navy-900:#0a1733;
+          --navy-800:#0f2147;
+          --navy-700:#16305f;
+          --gold-500:#d4af37;
+          --gold-400:#e8c860;
+          --gold-300:#f0d989;
+          --gold-100:#f5e7b8;
+          --text-light:#f4efe0;
+          --text-dim:#b9c2d6;
+        }
+
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        #map{ position: relative; background:var(--navy-950); }
+        body{ font-family:'Open Sans', sans-serif; }
+
+        /* =========================================================
+           BANDEAU TITRE
+        ========================================================= */
+        #appTitleBar{
+          position:absolute;
+          top:0; left:0; right:0;
+          z-index:998;
+          display:flex;
+          align-items:center;
+          gap:14px;
+          padding:12px 70px 12px 18px;
+          background:linear-gradient(180deg, rgba(7,15,36,0.96) 0%, rgba(7,15,36,0.75) 70%, rgba(7,15,36,0) 100%);
+          pointer-events:none;
+        }
+        #appTitleBar .title-emblem{
+          width:38px;height:38px;
+          border-radius:50%;
+          border:2px solid var(--gold-500);
+          display:flex;align-items:center;justify-content:center;
+          background:radial-gradient(circle at 35% 30%, var(--gold-300), var(--gold-500) 60%, var(--navy-800) 100%);
+          box-shadow:0 0 14px rgba(212,175,55,0.45);
+          flex-shrink:0;
+        }
+        #appTitleBar .title-emblem svg{ width:20px;height:20px; }
+        #appTitleBar .title-text h1{
+          margin:0;
+          font-family:'Cinzel', serif;
+          font-size:17px;
+          letter-spacing:1px;
+          color:var(--gold-400);
+          text-shadow:0 2px 8px rgba(0,0,0,0.6);
+        }
+        #appTitleBar .title-text p{
+          margin:2px 0 0;
+          font-size:11.5px;
+          color:var(--text-dim);
+          letter-spacing:.3px;
+        }
+        @media (max-width:600px){
+          #appTitleBar .title-text p{ display:none; }
+        }
+
+        /* =========================================================
+           ZOOM (Leaflet natif) restylé
+        ========================================================= */
+        .leaflet-control-zoom{
+          border:1px solid var(--gold-500) !important;
+          border-radius:8px !important;
+          overflow:hidden;
+          box-shadow:0 4px 16px rgba(0,0,0,0.45);
+          margin-top:78px !important;
+        }
+        .leaflet-control-zoom a{
+          background:var(--navy-800) !important;
+          color:var(--gold-400) !important;
+          border:none !important;
+          font-weight:700;
+        }
+        .leaflet-control-zoom a:hover{
+          background:var(--navy-700) !important;
+          color:var(--gold-100) !important;
+        }
+
+        /* =========================================================
+           BOUTON HAMBURGER (panneau couches, à droite)
+        ========================================================= */
+        #panelToggleBtn{
+          position:absolute;
+          top:14px;
+          right:14px;
+          z-index:1001;
+          width:44px;
+          height:44px;
+          background:linear-gradient(160deg, var(--navy-800), var(--navy-950));
+          border:1px solid var(--gold-500);
+          border-radius:8px;
+          color:var(--gold-400);
+          font-size:20px;
+          cursor:pointer;
+          box-shadow:0 4px 16px rgba(0,0,0,0.5);
+          transition:all .2s ease;
+        }
+        #panelToggleBtn:hover{
+          background:var(--navy-700);
+          box-shadow:0 0 16px rgba(212,175,55,0.5);
+          transform:translateY(-1px);
+        }
+
+        /* =========================================================
+           PANNEAU DROIT — COUCHES
+        ========================================================= */
+        #sidePanel{
+          position:absolute;
+          top:0;
+          right:-340px;
+          width:320px;
+          height:100%;
+          background:linear-gradient(180deg, var(--navy-900) 0%, var(--navy-950) 100%);
+          color:var(--text-light);
+          border-left:2px solid var(--gold-500);
+          z-index:1000;
+          transition:right .35s cubic-bezier(.4,0,.2,1);
+          overflow-y:auto;
+          box-shadow:-6px 0 24px rgba(0,0,0,0.5);
+        }
+        #sidePanel.open{ right:0; }
+        #sidePanel::-webkit-scrollbar{ width:7px; }
+        #sidePanel::-webkit-scrollbar-track{ background:var(--navy-950); }
+        #sidePanel::-webkit-scrollbar-thumb{ background:var(--gold-500); border-radius:4px; }
+
+        .panel-header{
+          padding:18px 18px 12px;
+          border-bottom:1px solid rgba(212,175,55,.4);
+          background:rgba(0,0,0,0.15);
+        }
+        .panel-header h2{
+          margin:0;
+          font-family:'Cinzel', serif;
+          font-size:15px;
+          color:var(--gold-400);
+          letter-spacing:.5px;
+        }
+        .panel-header p{
+          margin:4px 0 0;
+          font-size:11px;
+          color:var(--text-dim);
+        }
+
+        #sidePanel h3, #leftPanel h3{
+          color:var(--gold-400);
+          border-bottom:1px solid rgba(212,175,55,.5);
+          margin:0;
+          padding:14px 18px 8px;
+          font-size:13px;
+          letter-spacing:.6px;
+          text-transform:uppercase;
+          display:flex;
+          align-items:center;
+          gap:7px;
+        }
+        #sidePanel h3 .icon-dot, #leftPanel h3 .icon-dot{
+          width:7px;height:7px;border-radius:50%;
+          background:var(--gold-500);
+          box-shadow:0 0 6px var(--gold-500);
+        }
+
+        .panel-section{ padding:8px 18px 14px; border-bottom:1px solid rgba(212,175,55,.15); }
+
+        .layer-item{
+          display:flex;
+          align-items:center;
+          gap:9px;
+          padding:5px 0;
+          font-size:13px;
+          transition:opacity .15s;
+        }
+        .layer-item input[type="checkbox"]{
+          accent-color:var(--gold-500);
+          width:15px;height:15px;
+          cursor:pointer;
+        }
+        .layer-item label{ cursor:pointer; }
+        .layer-item:hover label{ color:var(--gold-100); }
+
+        .layer-group-title{
+          color:var(--gold-100);
+          font-size:11px;
+          font-weight:700;
+          text-transform:uppercase;
+          margin:12px 0 4px;
+          opacity:.8;
+          letter-spacing:.5px;
+        }
+
+        /* =========================================================
+           PANNEAU GAUCHE — FILTRES + LEGENDE (toujours visible)
+        ========================================================= */
+        #leftPanel{
+          position:absolute;
+          top:78px;
+          left:14px;
+          width:240px;
+          max-height:calc(100% - 100px);
+          overflow-y:auto;
+          background:linear-gradient(180deg, rgba(10,23,51,0.92) 0%, rgba(7,15,36,0.92) 100%);
+          border:1px solid var(--gold-500);
+          border-radius:10px;
+          color:var(--text-light);
+          z-index:900;
+          box-shadow:0 8px 26px rgba(0,0,0,0.5);
+        }
+        #leftPanel::-webkit-scrollbar{ width:6px; }
+        #leftPanel::-webkit-scrollbar-track{ background:transparent; }
+        #leftPanel::-webkit-scrollbar-thumb{ background:var(--gold-500); border-radius:4px; }
+        @media (max-width:760px){
+          #leftPanel{ display:none; }
+        }
+
+        /* =========================================================
+           FILTRES
+        ========================================================= */
+        .filter-btn{
+          display:flex;
+          align-items:center;
+          width:100%;
+          text-align:left;
+          padding:8px 10px;
+          margin-bottom:6px;
+          background:rgba(22,48,95,.55);
+          color:var(--text-light);
+          border:1px solid transparent;
+          border-radius:6px;
+          font-size:12.5px;
+          cursor:pointer;
+          transition:all .2s;
+        }
+        .filter-btn:hover{ border-color:var(--gold-500); background:rgba(22,48,95,.9); }
+        .filter-btn.active{
+          background:linear-gradient(90deg, var(--gold-500), var(--gold-400));
+          color:var(--navy-950);
+          font-weight:700;
+          border-color:var(--gold-500);
+          box-shadow:0 2px 10px rgba(212,175,55,0.35);
+        }
+        .filter-dot{
+          display:inline-block;
+          width:11px;height:11px;
+          border-radius:50%;
+          margin-right:8px;
+          flex-shrink:0;
+          box-shadow:0 0 4px rgba(0,0,0,0.5) inset;
+        }
+
+        /* =========================================================
+           LEGENDE / INFO TURBIDITE
+        ========================================================= */
+        .legend-row{
+          display:flex;
+          align-items:center;
+          gap:9px;
+          font-size:12px;
+          padding:4px 0;
+          color:var(--text-light);
+        }
+        .legend-swatch{
+          width:18px;height:14px;
+          border-radius:3px;
+          flex-shrink:0;
+          border:1px solid rgba(255,255,255,0.15);
+        }
+        .info-box{
+          background:rgba(212,175,55,0.08);
+          border:1px solid rgba(212,175,55,.3);
+          border-radius:6px;
+          padding:10px 12px;
+          font-size:11.5px;
+          line-height:1.5;
+          color:var(--text-dim);
+          margin-top:8px;
+        }
+        .info-box strong{ color:var(--gold-300); }
+
+        /* =========================================================
+           POPUPS
+        ========================================================= */
+        .leaflet-popup-content-wrapper{
+          background:linear-gradient(160deg, var(--navy-900), var(--navy-950));
+          color:var(--text-light);
+          border:1px solid var(--gold-500);
+          border-radius:9px;
+          box-shadow:0 6px 22px rgba(0,0,0,0.55);
+        }
+        .leaflet-popup-content{ font-size:13px; line-height:1.5; }
+        .leaflet-popup-content table td{
+          border-bottom:1px solid rgba(212,175,55,0.2);
+          padding:4px 2px;
+          color:var(--text-light);
+        }
+        .leaflet-popup-tip{ background:var(--navy-950); box-shadow:0 3px 14px rgba(0,0,0,0.5); }
+        .leaflet-container a.leaflet-popup-close-button{ color:var(--gold-400); }
+        .leaflet-container a.leaflet-popup-close-button:hover{ color:var(--gold-100); }
+
+        /* =========================================================
+           TOOLTIPS — étiquettes des localités
+           Sans cadre, sans fond, sans ombre de boîte : juste le texte
+           avec un halo blanc pour rester lisible sur le fond clair.
+        ========================================================= */
+        .leaflet-tooltip.css_LOCALITE_12{
+          background:transparent !important;
+          border:none !important;
+          box-shadow:none !important;
+          padding:0 !important;
+        }
+        .leaflet-tooltip.css_LOCALITE_12:before{
+          display:none !important;
+        }
+
+        /* Tooltips génériques restants (popups hover non permanents) */
+        .leaflet-tooltip:not(.css_LOCALITE_12){
+          background-color:var(--navy-950);
+          border:1px solid var(--gold-500);
+          color:var(--gold-100);
+          box-shadow:0 1px 6px rgba(0,0,0,0.5);
+        }
+        .leaflet-tooltip-bottom:before{ border-bottom-color:var(--navy-950); }
+        .leaflet-tooltip-top:before{ border-top-color:var(--navy-950); }
+        .leaflet-tooltip-left:before{ border-left-color:var(--navy-950); }
+        .leaflet-tooltip-right:before{ border-right-color:var(--navy-950); }
+
+        .leaflet-container .leaflet-control-attribution{
+          background:rgba(7,15,36,0.85);
+          color:var(--gold-100);
+        }
+        .leaflet-control-attribution a{ color:var(--gold-400); }
+        .leaflet-control-attribution a:hover{ color:var(--gold-100); }
+
+        .leaflet-control-scale-line{
+          background:rgba(7,15,36,0.85);
+          border-color:var(--gold-500);
+          color:var(--gold-100);
+          text-shadow:none;
+        }
+        </style>
+        <title>Turbidité du Bassin de la Bagoué</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+
+        <div id="appTitleBar">
+            <div class="title-emblem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0a1733" stroke-width="2"><path d="M3 16c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/><path d="M3 11c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/></svg>
+            </div>
+            <div class="title-text">
+                <h1>Suivi de la turbidité — Bassin de la Bagoué</h1>
+                <p>Télédétection Sentinel-2 · Sites d'orpaillage · 2016–2026</p>
+            </div>
+        </div>
+
+        <!-- ===== PANNEAU GAUCHE : FILTRES + LEGENDE (toujours visible) ===== -->
+        <div id="leftPanel">
+            <h3><span class="icon-dot"></span>Filtrer les sites d'orpaillage</h3>
+            <div class="panel-section" id="filterPanel">
+                <button class="filter-btn active" data-status="all"><span class="filter-dot" style="background:#d4af37"></span>Tous les statuts</button>
+                <button class="filter-btn" data-status="Actifs"><span class="filter-dot" style="background:#d664bd"></span>Actifs</button>
+                <button class="filter-btn" data-status="Abandonné"><span class="filter-dot" style="background:#6dd12f"></span>Abandonné</button>
+            </div>
+
+            <h3><span class="icon-dot"></span>Légende — Turbidité</h3>
+            <div class="panel-section">
+                <div class="legend-row"><span class="legend-swatch" style="background:#2ec4e6"></span>Très faible</div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#ffe066"></span>Faible</div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#ffb84d"></span>Modérée</div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#ff5c33"></span>Élevée</div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#1a1a1a"></span>Très élevée</div>
+                <div class="info-box">
+                    <strong>NDTI</strong> calculé à partir d'images <strong>Sentinel-2</strong> (B4–B3)/(B4+B3), masqué par l'eau (MNDWI &gt; 0). Sites clés : Papara, Zanékaha, Kanakono.
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== BOUTON + PANNEAU DROIT : COUCHES ===== -->
+        <button id="panelToggleBtn" title="Couches de la carte">&#9776;</button>
+
+        <div id="sidePanel">
+            <div class="panel-header">
+                <h2>Couches</h2>
+                <p>Affichez ou masquez les éléments de la carte</p>
+            </div>
+
+            <h3><span class="icon-dot"></span>Couches de la carte</h3>
+            <div class="panel-section" id="layersTree">
+                <div class="layer-group-title">Référence</div>
+                <div class="layer-item">
+                    <input type="checkbox" id="chk_BASSIN_1" checked>
+                    <label for="chk_BASSIN_1">Bassin versant</label>
+                </div>
+                <div class="layer-item">
+                    <input type="checkbox" id="chk_LOCALITE_12" checked>
+                    <label for="chk_LOCALITE_12">Localités</label>
+                </div>
+
+                <div class="layer-group-title">Sites d'orpaillage</div>
+                <div class="layer-item">
+                    <input type="checkbox" id="chk_SITE_ORPAILLAGE_2_2" checked>
+                    <label for="chk_SITE_ORPAILLAGE_2_2">Sites d'orpaillage</label>
+                </div>
+
+                <div class="layer-group-title">Turbidité — Saison sèche</div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2016_3"><label for="chk_TURBIDITE_SECHE_2016_3">2016</label></div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2018_4"><label for="chk_TURBIDITE_SECHE_2018_4">2018</label></div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2020_5"><label for="chk_TURBIDITE_SECHE_2020_5">2020</label></div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2022_7"><label for="chk_TURBIDITE_SECHE_2022_7">2022</label></div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2024_9"><label for="chk_TURBIDITE_SECHE_2024_9">2024</label></div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2026_11" checked><label for="chk_TURBIDITE_SECHE_2026_11">2026</label></div>
+
+                <div class="layer-group-title">Turbidité — Saison des pluies</div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_PLUIE_2020_6"><label for="chk_TURBIDITE_PLUIE_2020_6">2020</label></div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_PLUIE_2022_8"><label for="chk_TURBIDITE_PLUIE_2022_8">2022</label></div>
+                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_PLUIE_2024_10"><label for="chk_TURBIDITE_PLUIE_2024_10">2024</label></div>
+            </div>
+        </div>
+
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="data/BASSIN_1.js"></script>
+        <script src="data/SITE_ORPAILLAGE_2_2.js"></script>
+        <script src="data/LOCALITE_12.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[10.21627545284231,-6.8844918298410285],[10.873793578433544,-5.6874104732774855]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        function addClassToPopupIfMedia(content, popup) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var imgTd = tempDiv.querySelector('td img');
+            if (imgTd) {
+                var src = imgTd.getAttribute('src');
+                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() {
+                        popup.update();
+                    }, 10);
+                } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
+                    var audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = src;
+                    imgTd.parentNode.replaceChild(audio, imgTd);
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
+                    var video = document.createElement('video');
+                    video.controls = true;
+                    video.src = src;
+                    video.style.width = "400px";
+                    video.style.height = "300px";
+                    video.style.maxHeight = "60vh";
+                    video.style.maxWidth = "60vw";
+                    imgTd.parentNode.replaceChild(video, imgTd);
+                    popup._contentNode.classList.add('media');
+                    video.addEventListener('loadedmetadata', function() {
+                        popup.update();
+                    });
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else {
+                    popup._contentNode.classList.remove('media');
+                }
+            } else {
+                popup._contentNode.classList.remove('media');
+            }
+        }
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+        function pop_BASSIN_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['fid'] !== null ? autolinker.link(String(feature.properties['fid']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['DN'] !== null ? autolinker.link(String(feature.properties['DN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+      layer.on('popupopen', function(e) {
+        addClassToPopupIfMedia(content, e.popup);
+      });
+      layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_BASSIN_1_0() {
+            return {
+                pane: 'pane_BASSIN_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(190,207,80,0.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_BASSIN_1');
+        map.getPane('pane_BASSIN_1').style.zIndex = 401;
+        map.getPane('pane_BASSIN_1').style['mix-blend-mode'] = 'normal';
+        var layer_BASSIN_1 = new L.geoJson(json_BASSIN_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BASSIN_1',
+            layerName: 'layer_BASSIN_1',
+            pane: 'pane_BASSIN_1',
+            onEachFeature: pop_BASSIN_1,
+            style: style_BASSIN_1_0,
+        });
+        bounds_group.addLayer(layer_BASSIN_1);
+        map.addLayer(layer_BASSIN_1);
+        function pop_SITE_ORPAILLAGE_2_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Id'] !== null ? autolinker.link(String(feature.properties['Id']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FF'] !== null ? autolinker.link(String(feature.properties['FF']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LOCALITE'] !== null ? autolinker.link(String(feature.properties['LOCALITE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Stru_Site'] !== null ? autolinker.link(String(feature.properties['Stru_Site']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Hydr_Prox'] !== null ? autolinker.link(String(feature.properties['Hydr_Prox']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Act_Pass'] !== null ? autolinker.link(String(feature.properties['Act_Pass']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['gridcode'] !== null ? autolinker.link(String(feature.properties['gridcode']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+      layer.on('popupopen', function(e) {
+        addClassToPopupIfMedia(content, e.popup);
+      });
+      layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_SITE_ORPAILLAGE_2_2_0(feature) {
+            switch(String(feature.properties['Act_Pass'])) {
+                case 'Abandonné':
+                    return {
+                pane: 'pane_SITE_ORPAILLAGE_2_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(109,209,47,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Actifs':
+                    return {
+                pane: 'pane_SITE_ORPAILLAGE_2_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(214,100,189,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_SITE_ORPAILLAGE_2_2');
+        map.getPane('pane_SITE_ORPAILLAGE_2_2').style.zIndex = 402;
+        map.getPane('pane_SITE_ORPAILLAGE_2_2').style['mix-blend-mode'] = 'normal';
+        var layer_SITE_ORPAILLAGE_2_2 = new L.geoJson(json_SITE_ORPAILLAGE_2_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SITE_ORPAILLAGE_2_2',
+            layerName: 'layer_SITE_ORPAILLAGE_2_2',
+            pane: 'pane_SITE_ORPAILLAGE_2_2',
+            onEachFeature: pop_SITE_ORPAILLAGE_2_2,
+            style: style_SITE_ORPAILLAGE_2_2_0,
+        });
+        bounds_group.addLayer(layer_SITE_ORPAILLAGE_2_2);
+        map.addLayer(layer_SITE_ORPAILLAGE_2_2);
+        map.createPane('pane_TURBIDITE_SECHE_2016_3');
+        map.getPane('pane_TURBIDITE_SECHE_2016_3').style.zIndex = 403;
+        var img_TURBIDITE_SECHE_2016_3 = 'data/TURBIDITE_SECHE_2016_3.png';
+        var img_bounds_TURBIDITE_SECHE_2016_3 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_SECHE_2016_3 = new L.imageOverlay(img_TURBIDITE_SECHE_2016_3,
+                                              img_bounds_TURBIDITE_SECHE_2016_3,
+                                              {pane: 'pane_TURBIDITE_SECHE_2016_3'});
+        bounds_group.addLayer(layer_TURBIDITE_SECHE_2016_3);
+        map.addLayer(layer_TURBIDITE_SECHE_2016_3);
+        map.createPane('pane_TURBIDITE_SECHE_2018_4');
+        map.getPane('pane_TURBIDITE_SECHE_2018_4').style.zIndex = 404;
+        var img_TURBIDITE_SECHE_2018_4 = 'data/TURBIDITE_SECHE_2018_4.png';
+        var img_bounds_TURBIDITE_SECHE_2018_4 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_SECHE_2018_4 = new L.imageOverlay(img_TURBIDITE_SECHE_2018_4,
+                                              img_bounds_TURBIDITE_SECHE_2018_4,
+                                              {pane: 'pane_TURBIDITE_SECHE_2018_4'});
+        bounds_group.addLayer(layer_TURBIDITE_SECHE_2018_4);
+        map.addLayer(layer_TURBIDITE_SECHE_2018_4);
+        map.createPane('pane_TURBIDITE_SECHE_2020_5');
+        map.getPane('pane_TURBIDITE_SECHE_2020_5').style.zIndex = 405;
+        var img_TURBIDITE_SECHE_2020_5 = 'data/TURBIDITE_SECHE_2020_5.png';
+        var img_bounds_TURBIDITE_SECHE_2020_5 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_SECHE_2020_5 = new L.imageOverlay(img_TURBIDITE_SECHE_2020_5,
+                                              img_bounds_TURBIDITE_SECHE_2020_5,
+                                              {pane: 'pane_TURBIDITE_SECHE_2020_5'});
+        bounds_group.addLayer(layer_TURBIDITE_SECHE_2020_5);
+        map.addLayer(layer_TURBIDITE_SECHE_2020_5);
+        map.createPane('pane_TURBIDITE_PLUIE_2020_6');
+        map.getPane('pane_TURBIDITE_PLUIE_2020_6').style.zIndex = 406;
+        var img_TURBIDITE_PLUIE_2020_6 = 'data/TURBIDITE_PLUIE_2020_6.png';
+        var img_bounds_TURBIDITE_PLUIE_2020_6 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_PLUIE_2020_6 = new L.imageOverlay(img_TURBIDITE_PLUIE_2020_6,
+                                              img_bounds_TURBIDITE_PLUIE_2020_6,
+                                              {pane: 'pane_TURBIDITE_PLUIE_2020_6'});
+        bounds_group.addLayer(layer_TURBIDITE_PLUIE_2020_6);
+        map.addLayer(layer_TURBIDITE_PLUIE_2020_6);
+        map.createPane('pane_TURBIDITE_SECHE_2022_7');
+        map.getPane('pane_TURBIDITE_SECHE_2022_7').style.zIndex = 407;
+        var img_TURBIDITE_SECHE_2022_7 = 'data/TURBIDITE_SECHE_2022_7.png';
+        var img_bounds_TURBIDITE_SECHE_2022_7 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_SECHE_2022_7 = new L.imageOverlay(img_TURBIDITE_SECHE_2022_7,
+                                              img_bounds_TURBIDITE_SECHE_2022_7,
+                                              {pane: 'pane_TURBIDITE_SECHE_2022_7'});
+        bounds_group.addLayer(layer_TURBIDITE_SECHE_2022_7);
+        map.addLayer(layer_TURBIDITE_SECHE_2022_7);
+        map.createPane('pane_TURBIDITE_PLUIE_2022_8');
+        map.getPane('pane_TURBIDITE_PLUIE_2022_8').style.zIndex = 408;
+        var img_TURBIDITE_PLUIE_2022_8 = 'data/TURBIDITE_PLUIE_2022_8.png';
+        var img_bounds_TURBIDITE_PLUIE_2022_8 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_PLUIE_2022_8 = new L.imageOverlay(img_TURBIDITE_PLUIE_2022_8,
+                                              img_bounds_TURBIDITE_PLUIE_2022_8,
+                                              {pane: 'pane_TURBIDITE_PLUIE_2022_8'});
+        bounds_group.addLayer(layer_TURBIDITE_PLUIE_2022_8);
+        map.addLayer(layer_TURBIDITE_PLUIE_2022_8);
+        map.createPane('pane_TURBIDITE_SECHE_2024_9');
+        map.getPane('pane_TURBIDITE_SECHE_2024_9').style.zIndex = 409;
+        var img_TURBIDITE_SECHE_2024_9 = 'data/TURBIDITE_SECHE_2024_9.png';
+        var img_bounds_TURBIDITE_SECHE_2024_9 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_SECHE_2024_9 = new L.imageOverlay(img_TURBIDITE_SECHE_2024_9,
+                                              img_bounds_TURBIDITE_SECHE_2024_9,
+                                              {pane: 'pane_TURBIDITE_SECHE_2024_9'});
+        bounds_group.addLayer(layer_TURBIDITE_SECHE_2024_9);
+        map.addLayer(layer_TURBIDITE_SECHE_2024_9);
+        map.createPane('pane_TURBIDITE_PLUIE_2024_10');
+        map.getPane('pane_TURBIDITE_PLUIE_2024_10').style.zIndex = 410;
+        var img_TURBIDITE_PLUIE_2024_10 = 'data/TURBIDITE_PLUIE_2024_10.png';
+        var img_bounds_TURBIDITE_PLUIE_2024_10 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_PLUIE_2024_10 = new L.imageOverlay(img_TURBIDITE_PLUIE_2024_10,
+                                              img_bounds_TURBIDITE_PLUIE_2024_10,
+                                              {pane: 'pane_TURBIDITE_PLUIE_2024_10'});
+        bounds_group.addLayer(layer_TURBIDITE_PLUIE_2024_10);
+        map.addLayer(layer_TURBIDITE_PLUIE_2024_10);
+        map.createPane('pane_TURBIDITE_SECHE_2026_11');
+        map.getPane('pane_TURBIDITE_SECHE_2026_11').style.zIndex = 411;
+        var img_TURBIDITE_SECHE_2026_11 = 'data/TURBIDITE_SECHE_2026_11.png';
+        var img_bounds_TURBIDITE_SECHE_2026_11 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var layer_TURBIDITE_SECHE_2026_11 = new L.imageOverlay(img_TURBIDITE_SECHE_2026_11,
+                                              img_bounds_TURBIDITE_SECHE_2026_11,
+                                              {pane: 'pane_TURBIDITE_SECHE_2026_11'});
+        bounds_group.addLayer(layer_TURBIDITE_SECHE_2026_11);
+        map.addLayer(layer_TURBIDITE_SECHE_2026_11);
+        function pop_LOCALITE_12(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(String(feature.properties['OBJECTID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['CLASS_NAME'] !== null ? autolinker.link(String(feature.properties['CLASS_NAME']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['CLASS_ID'] !== null ? autolinker.link(String(feature.properties['CLASS_ID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['DISTRICT_N'] !== null ? autolinker.link(String(feature.properties['DISTRICT_N']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PCODE1'] !== null ? autolinker.link(String(feature.properties['PCODE1']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REGION_NAM'] !== null ? autolinker.link(String(feature.properties['REGION_NAM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PCODE2'] !== null ? autolinker.link(String(feature.properties['PCODE2']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['DPT_NAM'] !== null ? autolinker.link(String(feature.properties['DPT_NAM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PCODE3'] !== null ? autolinker.link(String(feature.properties['PCODE3']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SUBDPT_NAM'] !== null ? autolinker.link(String(feature.properties['SUBDPT_NAM']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PCODE4'] !== null ? autolinker.link(String(feature.properties['PCODE4']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LOCALITY_N'] !== null ? autolinker.link(String(feature.properties['LOCALITY_N']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PCODE5'] !== null ? autolinker.link(String(feature.properties['PCODE5']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LON_WGS84'] !== null ? autolinker.link(String(feature.properties['LON_WGS84']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LAT_WGS84'] !== null ? autolinker.link(String(feature.properties['LAT_WGS84']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+      layer.on('popupopen', function(e) {
+        addClassToPopupIfMedia(content, e.popup);
+      });
+      layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_LOCALITE_12_0() {
+            return {
+                pane: 'pane_LOCALITE_12',
+                radius: 9,
+                opacity: 1,
+                color: 'rgba(10,23,51,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(212,175,55,1.0)',
+                interactive: true,
+            }
+        }
+        function style_LOCALITE_12_1() {
+            return {
+                pane: 'pane_LOCALITE_12',
+                radius: 3,
+                opacity: 1,
+                color: 'rgba(10,23,51,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(10,23,51,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_LOCALITE_12');
+        map.getPane('pane_LOCALITE_12').style.zIndex = 412;
+        map.getPane('pane_LOCALITE_12').style['mix-blend-mode'] = 'normal';
+        var layer_LOCALITE_12 = new L.geoJson.multiStyle(json_LOCALITE_12, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_LOCALITE_12',
+            layerName: 'layer_LOCALITE_12',
+            pane: 'pane_LOCALITE_12',
+            onEachFeature: pop_LOCALITE_12,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_LOCALITE_12_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_LOCALITE_12_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_LOCALITE_12);
+        map.addLayer(layer_LOCALITE_12);
+        setBounds();
+        var i = 0;
+        layer_LOCALITE_12.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['LOCALITY_N'] !== null?String('<div style="color:#0a1733; font-weight:700; font-size: 10.5pt; font-family: \'Open Sans\', sans-serif; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 4px #fff;">' + layer.feature.properties['LOCALITY_N']) + '</div>':''), {permanent: true, offset: [-0, -18], className: 'css_LOCALITE_12'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        resetLabels([layer_LOCALITE_12]);
+        map.on("zoomend", function(){
+            resetLabels([layer_LOCALITE_12]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_LOCALITE_12]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_LOCALITE_12]);
+        });
+
+        document.getElementById('panelToggleBtn').addEventListener('click', function(){
+            document.getElementById('sidePanel').classList.toggle('open');
+        });
+
+        var layerCheckMap = {
+            'chk_BASSIN_1': layer_BASSIN_1,
+            'chk_SITE_ORPAILLAGE_2_2': layer_SITE_ORPAILLAGE_2_2,
+            'chk_LOCALITE_12': layer_LOCALITE_12,
+            'chk_TURBIDITE_SECHE_2016_3': layer_TURBIDITE_SECHE_2016_3,
+            'chk_TURBIDITE_SECHE_2018_4': layer_TURBIDITE_SECHE_2018_4,
+            'chk_TURBIDITE_SECHE_2020_5': layer_TURBIDITE_SECHE_2020_5,
+            'chk_TURBIDITE_PLUIE_2020_6': layer_TURBIDITE_PLUIE_2020_6,
+            'chk_TURBIDITE_SECHE_2022_7': layer_TURBIDITE_SECHE_2022_7,
+            'chk_TURBIDITE_PLUIE_2022_8': layer_TURBIDITE_PLUIE_2022_8,
+            'chk_TURBIDITE_SECHE_2024_9': layer_TURBIDITE_SECHE_2024_9,
+            'chk_TURBIDITE_PLUIE_2024_10': layer_TURBIDITE_PLUIE_2024_10,
+            'chk_TURBIDITE_SECHE_2026_11': layer_TURBIDITE_SECHE_2026_11
+        };
+
+        Object.keys(layerCheckMap).forEach(function(id){
+            var chk = document.getElementById(id);
+            var lyr = layerCheckMap[id];
+            chk.addEventListener('change', function(){
+                if(chk.checked){
+                    map.addLayer(lyr);
+                } else {
+                    map.removeLayer(lyr);
+                }
+            });
+            if(!chk.checked && map.hasLayer(lyr)){
+                map.removeLayer(lyr);
+            }
+        });
+
+        var filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(function(btn){
+            btn.addEventListener('click', function(){
+                filterButtons.forEach(function(b){ b.classList.remove('active'); });
+                btn.classList.add('active');
+                var status = btn.getAttribute('data-status');
+
+                layer_SITE_ORPAILLAGE_2_2.eachLayer(function(feature){
+                    var val = feature.feature.properties['Act_Pass'];
+                    var match = (status === 'all') || (val === status);
+                    if(match){
+                        feature.setStyle({opacity:1, fillOpacity:1});
+                        if(feature._path) feature._path.style.display = '';
+                    } else {
+                        feature.setStyle({opacity:0, fillOpacity:0});
+                        if(feature._path) feature._path.style.display = 'none';
+                    }
+                });
+            });
+        });
+        </script>        
+    </body>
+</html>

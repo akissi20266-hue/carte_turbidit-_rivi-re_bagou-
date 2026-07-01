@@ -349,7 +349,9 @@
             <h3><span class="icon-dot"></span>Filtrer les sites d'orpaillage</h3>
             <div class="panel-section" id="filterPanel">
                 <button class="filter-btn active" data-status="all"><span class="filter-dot" style="background:#d4af37"></span>Tous les statuts</button>
+                <button class="filter-btn" data-status="Très actif"><span class="filter-dot" style="background:#8c1414"></span>Très actif</button>
                 <button class="filter-btn" data-status="Actifs"><span class="filter-dot" style="background:#e62323"></span>Actifs</button>
+                <button class="filter-btn" data-status="Partiellement Actif"><span class="filter-dot" style="background:#e8a13c"></span>Partiellement Actif</button>
                 <button class="filter-btn" data-status="Abandonné"><span class="filter-dot" style="background:#add394"></span>Abandonné</button>
             </div>
 
@@ -614,6 +616,50 @@
                 interactive: true,
             }
                     break;
+                case 'Très actif':
+                    return {
+                pane: 'pane_SITE_ORPAILLAGE_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(140,20,20,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Partiellement Actif':
+                    return {
+                pane: 'pane_SITE_ORPAILLAGE_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(232,161,60,1.0)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_SITE_ORPAILLAGE_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(150,150,150,1.0)',
+                interactive: true,
+            }
             }
         }
         map.createPane('pane_SITE_ORPAILLAGE_2');
@@ -625,6 +671,7 @@
             dataVar: 'json_SITE_ORPAILLAGE_2',
             layerName: 'layer_SITE_ORPAILLAGE_2',
             pane: 'pane_SITE_ORPAILLAGE_2',
+            renderer: L.canvas({ pane: 'pane_SITE_ORPAILLAGE_2', padding: 0.5 }),
             onEachFeature: pop_SITE_ORPAILLAGE_2,
             style: style_SITE_ORPAILLAGE_2_0,
         });

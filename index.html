@@ -36,9 +36,6 @@
         #map{ position: relative; background:var(--navy-950); }
         body{ font-family:'Open Sans', sans-serif; }
 
-        /* =========================================================
-           BANDEAU TITRE
-        ========================================================= */
         #appTitleBar{
           position:absolute;
           top:0; left:0; right:0;
@@ -78,9 +75,6 @@
           #appTitleBar .title-text p{ display:none; }
         }
 
-        /* =========================================================
-           ZOOM (Leaflet natif) restylé
-        ========================================================= */
         .leaflet-control-zoom{
           border:1px solid var(--gold-500) !important;
           border-radius:8px !important;
@@ -99,9 +93,6 @@
           color:var(--gold-100) !important;
         }
 
-        /* =========================================================
-           BOUTON HAMBURGER (panneau couches, à droite)
-        ========================================================= */
         #panelToggleBtn{
           position:absolute;
           top:14px;
@@ -124,9 +115,6 @@
           transform:translateY(-1px);
         }
 
-        /* =========================================================
-           PANNEAU DROIT — COUCHES
-        ========================================================= */
         #sidePanel{
           position:absolute;
           top:0;
@@ -210,9 +198,6 @@
           letter-spacing:.5px;
         }
 
-        /* =========================================================
-           PANNEAU GAUCHE — FILTRES + LEGENDE (toujours visible)
-        ========================================================= */
         #leftPanel{
           position:absolute;
           top:78px;
@@ -234,9 +219,6 @@
           #leftPanel{ display:none; }
         }
 
-        /* =========================================================
-           FILTRES
-        ========================================================= */
         .filter-btn{
           display:flex;
           align-items:center;
@@ -269,9 +251,6 @@
           box-shadow:0 0 4px rgba(0,0,0,0.5) inset;
         }
 
-        /* =========================================================
-           LEGENDE / INFO TURBIDITE
-        ========================================================= */
         .legend-row{
           display:flex;
           align-items:center;
@@ -298,9 +277,6 @@
         }
         .info-box strong{ color:var(--gold-300); }
 
-        /* =========================================================
-           POPUPS
-        ========================================================= */
         .leaflet-popup-content-wrapper{
           background:linear-gradient(160deg, var(--navy-900), var(--navy-950));
           color:var(--text-light);
@@ -318,11 +294,6 @@
         .leaflet-container a.leaflet-popup-close-button{ color:var(--gold-400); }
         .leaflet-container a.leaflet-popup-close-button:hover{ color:var(--gold-100); }
 
-        /* =========================================================
-           TOOLTIPS — étiquettes des localités
-           Sans cadre, sans fond, sans ombre de boîte : juste le texte
-           avec un halo blanc pour rester lisible sur le fond clair.
-        ========================================================= */
         .leaflet-tooltip.css_LOCALITE_12{
           background:transparent !important;
           border:none !important;
@@ -333,7 +304,6 @@
           display:none !important;
         }
 
-        /* Tooltips génériques restants (popups hover non permanents) */
         .leaflet-tooltip:not(.css_LOCALITE_12){
           background-color:var(--navy-950);
           border:1px solid var(--gold-500);
@@ -375,13 +345,12 @@
             </div>
         </div>
 
-        <!-- ===== PANNEAU GAUCHE : FILTRES + LEGENDE (toujours visible) ===== -->
         <div id="leftPanel">
             <h3><span class="icon-dot"></span>Filtrer les sites d'orpaillage</h3>
             <div class="panel-section" id="filterPanel">
                 <button class="filter-btn active" data-status="all"><span class="filter-dot" style="background:#d4af37"></span>Tous les statuts</button>
-                <button class="filter-btn" data-status="Actifs"><span class="filter-dot" style="background:#d664bd"></span>Actifs</button>
-                <button class="filter-btn" data-status="Abandonné"><span class="filter-dot" style="background:#6dd12f"></span>Abandonné</button>
+                <button class="filter-btn" data-status="Actifs"><span class="filter-dot" style="background:#e62323"></span>Actifs</button>
+                <button class="filter-btn" data-status="Abandonné"><span class="filter-dot" style="background:#add394"></span>Abandonné</button>
             </div>
 
             <h3><span class="icon-dot"></span>Légende — Turbidité</h3>
@@ -397,7 +366,6 @@
             </div>
         </div>
 
-        <!-- ===== BOUTON + PANNEAU DROIT : COUCHES ===== -->
         <button id="panelToggleBtn" title="Couches de la carte">&#9776;</button>
 
         <div id="sidePanel">
@@ -420,8 +388,8 @@
 
                 <div class="layer-group-title">Sites d'orpaillage</div>
                 <div class="layer-item">
-                    <input type="checkbox" id="chk_SITE_ORPAILLAGE_2_2" checked>
-                    <label for="chk_SITE_ORPAILLAGE_2_2">Sites d'orpaillage</label>
+                    <input type="checkbox" id="chk_SITE_ORPAILLAGE_2" checked>
+                    <label for="chk_SITE_ORPAILLAGE_2">Sites d'orpaillage</label>
                 </div>
 
                 <div class="layer-group-title">Turbidité — Saison sèche</div>
@@ -452,12 +420,12 @@
         <script src="js/labels.js"></script>
         <script src="js/leaflet.photon.js"></script>
         <script src="data/BASSIN_1.js"></script>
-        <script src="data/SITE_ORPAILLAGE_2_2.js"></script>
+        <script src="data/SITE_ORPAILLAGE_2.js"></script>
         <script src="data/LOCALITE_12.js"></script>
         <script>
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
-        }).fitBounds([[10.21627545284231,-6.8844918298410285],[10.873793578433544,-5.6874104732774855]]);
+        }).fitBounds([[10.196278791863065,-6.829575633059692],[10.8537180509325,-5.655653027197563]]);
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
@@ -548,10 +516,10 @@
                     </tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-      layer.on('popupopen', function(e) {
-        addClassToPopupIfMedia(content, e.popup);
-      });
-      layer.bindPopup(content, { maxHeight: 400 });
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_BASSIN_1_0() {
@@ -583,7 +551,7 @@
         });
         bounds_group.addLayer(layer_BASSIN_1);
         map.addLayer(layer_BASSIN_1);
-        function pop_SITE_ORPAILLAGE_2_2(feature, layer) {
+        function pop_SITE_ORPAILLAGE_2(feature, layer) {
             var popupContent = '<table>\
                     <tr>\
                         <td colspan="2">' + (feature.properties['Id'] !== null ? autolinker.link(String(feature.properties['Id']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
@@ -608,17 +576,17 @@
                     </tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-      layer.on('popupopen', function(e) {
-        addClassToPopupIfMedia(content, e.popup);
-      });
-      layer.bindPopup(content, { maxHeight: 400 });
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
         }
 
-        function style_SITE_ORPAILLAGE_2_2_0(feature) {
+        function style_SITE_ORPAILLAGE_2_0(feature) {
             switch(String(feature.properties['Act_Pass'])) {
                 case 'Abandonné':
                     return {
-                pane: 'pane_SITE_ORPAILLAGE_2_2',
+                pane: 'pane_SITE_ORPAILLAGE_2',
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
                 dashArray: '',
@@ -627,13 +595,13 @@
                 weight: 1.0, 
                 fill: true,
                 fillOpacity: 1,
-                fillColor: 'rgba(109,209,47,1.0)',
+                fillColor: 'rgba(173,211,148,1.0)',
                 interactive: true,
             }
                     break;
                 case 'Actifs':
                     return {
-                pane: 'pane_SITE_ORPAILLAGE_2_2',
+                pane: 'pane_SITE_ORPAILLAGE_2',
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
                 dashArray: '',
@@ -642,26 +610,26 @@
                 weight: 1.0, 
                 fill: true,
                 fillOpacity: 1,
-                fillColor: 'rgba(214,100,189,1.0)',
+                fillColor: 'rgba(230,35,35,1.0)',
                 interactive: true,
             }
                     break;
             }
         }
-        map.createPane('pane_SITE_ORPAILLAGE_2_2');
-        map.getPane('pane_SITE_ORPAILLAGE_2_2').style.zIndex = 402;
-        map.getPane('pane_SITE_ORPAILLAGE_2_2').style['mix-blend-mode'] = 'normal';
-        var layer_SITE_ORPAILLAGE_2_2 = new L.geoJson(json_SITE_ORPAILLAGE_2_2, {
+        map.createPane('pane_SITE_ORPAILLAGE_2');
+        map.getPane('pane_SITE_ORPAILLAGE_2').style.zIndex = 402;
+        map.getPane('pane_SITE_ORPAILLAGE_2').style['mix-blend-mode'] = 'normal';
+        var layer_SITE_ORPAILLAGE_2 = new L.geoJson(json_SITE_ORPAILLAGE_2, {
             attribution: '',
             interactive: true,
-            dataVar: 'json_SITE_ORPAILLAGE_2_2',
-            layerName: 'layer_SITE_ORPAILLAGE_2_2',
-            pane: 'pane_SITE_ORPAILLAGE_2_2',
-            onEachFeature: pop_SITE_ORPAILLAGE_2_2,
-            style: style_SITE_ORPAILLAGE_2_2_0,
+            dataVar: 'json_SITE_ORPAILLAGE_2',
+            layerName: 'layer_SITE_ORPAILLAGE_2',
+            pane: 'pane_SITE_ORPAILLAGE_2',
+            onEachFeature: pop_SITE_ORPAILLAGE_2,
+            style: style_SITE_ORPAILLAGE_2_0,
         });
-        bounds_group.addLayer(layer_SITE_ORPAILLAGE_2_2);
-        map.addLayer(layer_SITE_ORPAILLAGE_2_2);
+        bounds_group.addLayer(layer_SITE_ORPAILLAGE_2);
+        map.addLayer(layer_SITE_ORPAILLAGE_2);
         map.createPane('pane_TURBIDITE_SECHE_2016_3');
         map.getPane('pane_TURBIDITE_SECHE_2016_3').style.zIndex = 403;
         var img_TURBIDITE_SECHE_2016_3 = 'data/TURBIDITE_SECHE_2016_3.png';
@@ -792,10 +760,10 @@
                     </tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-      layer.on('popupopen', function(e) {
-        addClassToPopupIfMedia(content, e.popup);
-      });
-      layer.bindPopup(content, { maxHeight: 400 });
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_LOCALITE_12_0() {
@@ -892,7 +860,7 @@
 
         var layerCheckMap = {
             'chk_BASSIN_1': layer_BASSIN_1,
-            'chk_SITE_ORPAILLAGE_2_2': layer_SITE_ORPAILLAGE_2_2,
+            'chk_SITE_ORPAILLAGE_2': layer_SITE_ORPAILLAGE_2,
             'chk_LOCALITE_12': layer_LOCALITE_12,
             'chk_TURBIDITE_SECHE_2016_3': layer_TURBIDITE_SECHE_2016_3,
             'chk_TURBIDITE_SECHE_2018_4': layer_TURBIDITE_SECHE_2018_4,
@@ -927,7 +895,7 @@
                 btn.classList.add('active');
                 var status = btn.getAttribute('data-status');
 
-                layer_SITE_ORPAILLAGE_2_2.eachLayer(function(feature){
+                layer_SITE_ORPAILLAGE_2.eachLayer(function(feature){
                     var val = feature.feature.properties['Act_Pass'];
                     var match = (status === 'all') || (val === status);
                     if(match){

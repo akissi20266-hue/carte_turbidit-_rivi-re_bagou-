@@ -907,7 +907,6 @@
 
         var layerCheckMap = {
             'chk_BASSIN_1': layer_BASSIN_1,
-            'chk_SITE_ORPAILLAGE_2': layer_SITE_ORPAILLAGE_2,
             'chk_LOCALITE_12': layer_LOCALITE_12,
             'chk_TURBIDITE_SECHE_2016_3': layer_TURBIDITE_SECHE_2016_3,
             'chk_TURBIDITE_SECHE_2018_4': layer_TURBIDITE_SECHE_2018_4,
@@ -934,6 +933,21 @@
                 map.removeLayer(lyr);
             }
         });
+
+        // ---- Cas particulier : Sites d'orpaillage (24 660 entités) ----
+        // Utiliser map.addLayer/removeLayer sur une couche aussi volumineuse
+        // force Leaflet à parcourir chaque entité une par une, ce qui bloque
+        // le navigateur. On bascule donc simplement la visibilité CSS du
+        // pane correspondant : c'est instantané, quel que soit le nombre
+        // d'entités, car aucune manipulation de couche Leaflet n'a lieu.
+        var chkOrpaillage = document.getElementById('chk_SITE_ORPAILLAGE_2');
+        var paneOrpaillage = map.getPane('pane_SITE_ORPAILLAGE_2');
+        chkOrpaillage.addEventListener('change', function(){
+            paneOrpaillage.style.display = chkOrpaillage.checked ? '' : 'none';
+        });
+        if(!chkOrpaillage.checked){
+            paneOrpaillage.style.display = 'none';
+        }
 
         var filterButtons = document.querySelectorAll('.filter-btn');
         filterButtons.forEach(function(btn){

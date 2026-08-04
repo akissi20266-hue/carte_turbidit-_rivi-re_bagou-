@@ -18,6 +18,9 @@ on:
         description: 'Année à associer à cette couche (requis si dates renseignées)'
         required: false
 
+permissions:
+  contents: write
+
 jobs:
   update-map:
     runs-on: ubuntu-latest

@@ -60,7 +60,7 @@ def mask_s2_clouds(image):
 
 
 def compute_ndti(image, basin_geometry):
-    ndti = image.normalizedDifference(["B4", "B3"]).rename("NDTI")
+    ndti = image.normalizedDifference(["B3", "B4"]).rename("NDTI")  # (B3-B4)/(B3+B4)
     mndwi = image.normalizedDifference(["B3", "B11"]).rename("MNDWI")
     water_mask = mndwi.gt(0)
     return ndti.updateMask(water_mask).clip(basin_geometry)

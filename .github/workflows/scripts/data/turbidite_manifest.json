@@ -1,0 +1,11 @@
+[
+  { "season": "seche", "year": 2016, "file": "TURBIDITE_SECHE_2016_3.png" },
+  { "season": "seche", "year": 2018, "file": "TURBIDITE_SECHE_2018_4.png" },
+  { "season": "seche", "year": 2020, "file": "TURBIDITE_SECHE_2020_5.png" },
+  { "season": "seche", "year": 2022, "file": "TURBIDITE_SECHE_2022_7.png" },
+  { "season": "seche", "year": 2024, "file": "TURBIDITE_SECHE_2024_9.png" },
+  { "season": "seche", "year": 2026, "file": "TURBIDITE_SECHE_2026_11.png" },
+  { "season": "pluie", "year": 2020, "file": "TURBIDITE_PLUIE_2020_6.png" },
+  { "season": "pluie", "year": 2022, "file": "TURBIDITE_PLUIE_2022_8.png" },
+  { "season": "pluie", "year": 2024, "file": "TURBIDITE_PLUIE_2024_10.png" }
+]

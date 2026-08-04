@@ -349,9 +349,7 @@
             <h3><span class="icon-dot"></span>Filtrer les sites d'orpaillage</h3>
             <div class="panel-section" id="filterPanel">
                 <button class="filter-btn active" data-status="all"><span class="filter-dot" style="background:#d4af37"></span>Tous les statuts</button>
-                <button class="filter-btn" data-status="Très actif"><span class="filter-dot" style="background:#8c1414"></span>Très actif</button>
                 <button class="filter-btn" data-status="Actifs"><span class="filter-dot" style="background:#e62323"></span>Actifs</button>
-                <button class="filter-btn" data-status="Partiellement Actif"><span class="filter-dot" style="background:#e8a13c"></span>Partiellement Actif</button>
                 <button class="filter-btn" data-status="Abandonné"><span class="filter-dot" style="background:#add394"></span>Abandonné</button>
             </div>
 
@@ -363,7 +361,7 @@
                 <div class="legend-row"><span class="legend-swatch" style="background:#ff5c33"></span>Élevée</div>
                 <div class="legend-row"><span class="legend-swatch" style="background:#1a1a1a"></span>Très élevée</div>
                 <div class="info-box">
-                    <strong>NDTI</strong> calculé à partir d'images <strong>Sentinel-2</strong> (B4–B3)/(B4+B3), masqué par l'eau (MNDWI &gt; 0). Sites clés : Papara, Zanékaha, Kanakono.
+                    <strong>NDTI</strong> calculé à partir d'images <strong>Sentinel-2</strong> (B3–B4)/(B3+B4), masqué par l'eau (MNDWI &gt; 0). Sites clés : Papara, Zanékaha, Kanakono.
                 </div>
             </div>
         </div>
@@ -395,17 +393,10 @@
                 </div>
 
                 <div class="layer-group-title">Turbidité — Saison sèche</div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2016_3"><label for="chk_TURBIDITE_SECHE_2016_3">2016</label></div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2018_4"><label for="chk_TURBIDITE_SECHE_2018_4">2018</label></div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2020_5"><label for="chk_TURBIDITE_SECHE_2020_5">2020</label></div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2022_7"><label for="chk_TURBIDITE_SECHE_2022_7">2022</label></div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2024_9"><label for="chk_TURBIDITE_SECHE_2024_9">2024</label></div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_SECHE_2026_11" checked><label for="chk_TURBIDITE_SECHE_2026_11">2026</label></div>
+                <div id="turbiditeSecheGroup"><!-- rempli automatiquement depuis data/turbidite_manifest.json --></div>
 
                 <div class="layer-group-title">Turbidité — Saison des pluies</div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_PLUIE_2020_6"><label for="chk_TURBIDITE_PLUIE_2020_6">2020</label></div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_PLUIE_2022_8"><label for="chk_TURBIDITE_PLUIE_2022_8">2022</label></div>
-                <div class="layer-item"><input type="checkbox" id="chk_TURBIDITE_PLUIE_2024_10"><label for="chk_TURBIDITE_PLUIE_2024_10">2024</label></div>
+                <div id="turbiditePluieGroup"><!-- rempli automatiquement depuis data/turbidite_manifest.json --></div>
             </div>
         </div>
 
@@ -616,50 +607,6 @@
                 interactive: true,
             }
                     break;
-                case 'Très actif':
-                    return {
-                pane: 'pane_SITE_ORPAILLAGE_2',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(140,20,20,1.0)',
-                interactive: true,
-            }
-                    break;
-                case 'Partiellement Actif':
-                    return {
-                pane: 'pane_SITE_ORPAILLAGE_2',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(232,161,60,1.0)',
-                interactive: true,
-            }
-                    break;
-                default:
-                    return {
-                pane: 'pane_SITE_ORPAILLAGE_2',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(150,150,150,1.0)',
-                interactive: true,
-            }
             }
         }
         map.createPane('pane_SITE_ORPAILLAGE_2');
@@ -671,93 +618,82 @@
             dataVar: 'json_SITE_ORPAILLAGE_2',
             layerName: 'layer_SITE_ORPAILLAGE_2',
             pane: 'pane_SITE_ORPAILLAGE_2',
-            renderer: L.canvas({ pane: 'pane_SITE_ORPAILLAGE_2', padding: 0.5 }),
             onEachFeature: pop_SITE_ORPAILLAGE_2,
             style: style_SITE_ORPAILLAGE_2_0,
         });
         bounds_group.addLayer(layer_SITE_ORPAILLAGE_2);
         map.addLayer(layer_SITE_ORPAILLAGE_2);
-        map.createPane('pane_TURBIDITE_SECHE_2016_3');
-        map.getPane('pane_TURBIDITE_SECHE_2016_3').style.zIndex = 403;
-        var img_TURBIDITE_SECHE_2016_3 = 'data/TURBIDITE_SECHE_2016_3.png';
-        var img_bounds_TURBIDITE_SECHE_2016_3 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_SECHE_2016_3 = new L.imageOverlay(img_TURBIDITE_SECHE_2016_3,
-                                              img_bounds_TURBIDITE_SECHE_2016_3,
-                                              {pane: 'pane_TURBIDITE_SECHE_2016_3'});
-        bounds_group.addLayer(layer_TURBIDITE_SECHE_2016_3);
-        map.addLayer(layer_TURBIDITE_SECHE_2016_3);
-        map.createPane('pane_TURBIDITE_SECHE_2018_4');
-        map.getPane('pane_TURBIDITE_SECHE_2018_4').style.zIndex = 404;
-        var img_TURBIDITE_SECHE_2018_4 = 'data/TURBIDITE_SECHE_2018_4.png';
-        var img_bounds_TURBIDITE_SECHE_2018_4 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_SECHE_2018_4 = new L.imageOverlay(img_TURBIDITE_SECHE_2018_4,
-                                              img_bounds_TURBIDITE_SECHE_2018_4,
-                                              {pane: 'pane_TURBIDITE_SECHE_2018_4'});
-        bounds_group.addLayer(layer_TURBIDITE_SECHE_2018_4);
-        map.addLayer(layer_TURBIDITE_SECHE_2018_4);
-        map.createPane('pane_TURBIDITE_SECHE_2020_5');
-        map.getPane('pane_TURBIDITE_SECHE_2020_5').style.zIndex = 405;
-        var img_TURBIDITE_SECHE_2020_5 = 'data/TURBIDITE_SECHE_2020_5.png';
-        var img_bounds_TURBIDITE_SECHE_2020_5 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_SECHE_2020_5 = new L.imageOverlay(img_TURBIDITE_SECHE_2020_5,
-                                              img_bounds_TURBIDITE_SECHE_2020_5,
-                                              {pane: 'pane_TURBIDITE_SECHE_2020_5'});
-        bounds_group.addLayer(layer_TURBIDITE_SECHE_2020_5);
-        map.addLayer(layer_TURBIDITE_SECHE_2020_5);
-        map.createPane('pane_TURBIDITE_PLUIE_2020_6');
-        map.getPane('pane_TURBIDITE_PLUIE_2020_6').style.zIndex = 406;
-        var img_TURBIDITE_PLUIE_2020_6 = 'data/TURBIDITE_PLUIE_2020_6.png';
-        var img_bounds_TURBIDITE_PLUIE_2020_6 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_PLUIE_2020_6 = new L.imageOverlay(img_TURBIDITE_PLUIE_2020_6,
-                                              img_bounds_TURBIDITE_PLUIE_2020_6,
-                                              {pane: 'pane_TURBIDITE_PLUIE_2020_6'});
-        bounds_group.addLayer(layer_TURBIDITE_PLUIE_2020_6);
-        map.addLayer(layer_TURBIDITE_PLUIE_2020_6);
-        map.createPane('pane_TURBIDITE_SECHE_2022_7');
-        map.getPane('pane_TURBIDITE_SECHE_2022_7').style.zIndex = 407;
-        var img_TURBIDITE_SECHE_2022_7 = 'data/TURBIDITE_SECHE_2022_7.png';
-        var img_bounds_TURBIDITE_SECHE_2022_7 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_SECHE_2022_7 = new L.imageOverlay(img_TURBIDITE_SECHE_2022_7,
-                                              img_bounds_TURBIDITE_SECHE_2022_7,
-                                              {pane: 'pane_TURBIDITE_SECHE_2022_7'});
-        bounds_group.addLayer(layer_TURBIDITE_SECHE_2022_7);
-        map.addLayer(layer_TURBIDITE_SECHE_2022_7);
-        map.createPane('pane_TURBIDITE_PLUIE_2022_8');
-        map.getPane('pane_TURBIDITE_PLUIE_2022_8').style.zIndex = 408;
-        var img_TURBIDITE_PLUIE_2022_8 = 'data/TURBIDITE_PLUIE_2022_8.png';
-        var img_bounds_TURBIDITE_PLUIE_2022_8 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_PLUIE_2022_8 = new L.imageOverlay(img_TURBIDITE_PLUIE_2022_8,
-                                              img_bounds_TURBIDITE_PLUIE_2022_8,
-                                              {pane: 'pane_TURBIDITE_PLUIE_2022_8'});
-        bounds_group.addLayer(layer_TURBIDITE_PLUIE_2022_8);
-        map.addLayer(layer_TURBIDITE_PLUIE_2022_8);
-        map.createPane('pane_TURBIDITE_SECHE_2024_9');
-        map.getPane('pane_TURBIDITE_SECHE_2024_9').style.zIndex = 409;
-        var img_TURBIDITE_SECHE_2024_9 = 'data/TURBIDITE_SECHE_2024_9.png';
-        var img_bounds_TURBIDITE_SECHE_2024_9 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_SECHE_2024_9 = new L.imageOverlay(img_TURBIDITE_SECHE_2024_9,
-                                              img_bounds_TURBIDITE_SECHE_2024_9,
-                                              {pane: 'pane_TURBIDITE_SECHE_2024_9'});
-        bounds_group.addLayer(layer_TURBIDITE_SECHE_2024_9);
-        map.addLayer(layer_TURBIDITE_SECHE_2024_9);
-        map.createPane('pane_TURBIDITE_PLUIE_2024_10');
-        map.getPane('pane_TURBIDITE_PLUIE_2024_10').style.zIndex = 410;
-        var img_TURBIDITE_PLUIE_2024_10 = 'data/TURBIDITE_PLUIE_2024_10.png';
-        var img_bounds_TURBIDITE_PLUIE_2024_10 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_PLUIE_2024_10 = new L.imageOverlay(img_TURBIDITE_PLUIE_2024_10,
-                                              img_bounds_TURBIDITE_PLUIE_2024_10,
-                                              {pane: 'pane_TURBIDITE_PLUIE_2024_10'});
-        bounds_group.addLayer(layer_TURBIDITE_PLUIE_2024_10);
-        map.addLayer(layer_TURBIDITE_PLUIE_2024_10);
-        map.createPane('pane_TURBIDITE_SECHE_2026_11');
-        map.getPane('pane_TURBIDITE_SECHE_2026_11').style.zIndex = 411;
-        var img_TURBIDITE_SECHE_2026_11 = 'data/TURBIDITE_SECHE_2026_11.png';
-        var img_bounds_TURBIDITE_SECHE_2026_11 = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
-        var layer_TURBIDITE_SECHE_2026_11 = new L.imageOverlay(img_TURBIDITE_SECHE_2026_11,
-                                              img_bounds_TURBIDITE_SECHE_2026_11,
-                                              {pane: 'pane_TURBIDITE_SECHE_2026_11'});
-        bounds_group.addLayer(layer_TURBIDITE_SECHE_2026_11);
-        map.addLayer(layer_TURBIDITE_SECHE_2026_11);
+        // --- Couches de turbidité : chargées dynamiquement depuis data/turbidite_manifest.json ---
+        // Ajouter une nouvelle année ne demande plus de toucher à ce fichier HTML :
+        // il suffit que le pipeline automatique ajoute une entrée au manifeste + le PNG géoréférencé.
+        var TURBIDITE_BOUNDS = [[10.209588873396282,-6.493252182341659],[10.851556932016974,-6.055363531729509]];
+        var turbiditePaneZIndex = 403; // suite de la numérotation des panes existants (SITE_ORPAILLAGE_2 = 402)
+
+        function bindLayerCheckbox(id, lyr) {
+            var chk = document.getElementById(id);
+            if (!chk || !lyr) return;
+            chk.addEventListener('change', function () {
+                if (chk.checked) { map.addLayer(lyr); } else { map.removeLayer(lyr); }
+            });
+            if (!chk.checked && map.hasLayer(lyr)) { map.removeLayer(lyr); }
+        }
+
+        function loadTurbiditeLayers() {
+            fetch('data/turbidite_manifest.json')
+                .then(function (resp) {
+                    if (!resp.ok) throw new Error('manifest introuvable (' + resp.status + ')');
+                    return resp.json();
+                })
+                .then(function (manifest) {
+                    manifest.sort(function (a, b) { return a.year - b.year; });
+
+                    var maxYearBySeason = {};
+                    manifest.forEach(function (entry) {
+                        var key = entry.season;
+                        if (!maxYearBySeason[key] || entry.year > maxYearBySeason[key]) {
+                            maxYearBySeason[key] = entry.year;
+                        }
+                    });
+
+                    var groupContainers = {
+                        seche: document.getElementById('turbiditeSecheGroup'),
+                        pluie: document.getElementById('turbiditePluieGroup')
+                    };
+
+                    manifest.forEach(function (entry) {
+                        var season = entry.season; // "seche" ou "pluie"
+                        var id = 'chk_TURBIDITE_' + season.toUpperCase() + '_' + entry.year;
+                        var paneName = 'pane_' + id;
+
+                        map.createPane(paneName);
+                        map.getPane(paneName).style.zIndex = turbiditePaneZIndex++;
+
+                        var layer = new L.imageOverlay('data/' + entry.file, TURBIDITE_BOUNDS, { pane: paneName });
+                        bounds_group.addLayer(layer);
+
+                        // Par défaut, seule l'année la plus récente de la saison sèche est affichée,
+                        // comme dans la carte d'origine.
+                        var visibleByDefault = (season === 'seche' && entry.year === maxYearBySeason['seche']);
+                        if (visibleByDefault) { map.addLayer(layer); }
+
+                        var item = document.createElement('div');
+                        item.className = 'layer-item';
+                        item.innerHTML = '<input type="checkbox" id="' + id + '"' + (visibleByDefault ? ' checked' : '') + '>' +
+                            '<label for="' + id + '">' + entry.year + '</label>';
+                        var container = groupContainers[season];
+                        if (container) { container.appendChild(item); }
+
+                        bindLayerCheckbox(id, layer);
+                    });
+
+                    setBounds();
+                })
+                .catch(function (err) {
+                    console.error('Erreur de chargement des couches de turbidité :', err);
+                });
+        }
+        loadTurbiditeLayers();
+
         function pop_LOCALITE_12(feature, layer) {
             var popupContent = '<table>\
                     <tr>\
@@ -905,34 +841,15 @@
             document.getElementById('sidePanel').classList.toggle('open');
         });
 
+        // Couches statiques (les couches de turbidité sont gérées par loadTurbiditeLayers ci-dessus)
         var layerCheckMap = {
             'chk_BASSIN_1': layer_BASSIN_1,
             'chk_SITE_ORPAILLAGE_2': layer_SITE_ORPAILLAGE_2,
-            'chk_LOCALITE_12': layer_LOCALITE_12,
-            'chk_TURBIDITE_SECHE_2016_3': layer_TURBIDITE_SECHE_2016_3,
-            'chk_TURBIDITE_SECHE_2018_4': layer_TURBIDITE_SECHE_2018_4,
-            'chk_TURBIDITE_SECHE_2020_5': layer_TURBIDITE_SECHE_2020_5,
-            'chk_TURBIDITE_PLUIE_2020_6': layer_TURBIDITE_PLUIE_2020_6,
-            'chk_TURBIDITE_SECHE_2022_7': layer_TURBIDITE_SECHE_2022_7,
-            'chk_TURBIDITE_PLUIE_2022_8': layer_TURBIDITE_PLUIE_2022_8,
-            'chk_TURBIDITE_SECHE_2024_9': layer_TURBIDITE_SECHE_2024_9,
-            'chk_TURBIDITE_PLUIE_2024_10': layer_TURBIDITE_PLUIE_2024_10,
-            'chk_TURBIDITE_SECHE_2026_11': layer_TURBIDITE_SECHE_2026_11
+            'chk_LOCALITE_12': layer_LOCALITE_12
         };
 
-        Object.keys(layerCheckMap).forEach(function(id){
-            var chk = document.getElementById(id);
-            var lyr = layerCheckMap[id];
-            chk.addEventListener('change', function(){
-                if(chk.checked){
-                    map.addLayer(lyr);
-                } else {
-                    map.removeLayer(lyr);
-                }
-            });
-            if(!chk.checked && map.hasLayer(lyr)){
-                map.removeLayer(lyr);
-            }
+        Object.keys(layerCheckMap).forEach(function (id) {
+            bindLayerCheckbox(id, layerCheckMap[id]);
         });
 
         var filterButtons = document.querySelectorAll('.filter-btn');
